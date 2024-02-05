@@ -28,6 +28,8 @@ detent_width = 4;
 // Size of the slots either side of the detent
 cutout_width = 0.5;
 cutout_height = 8;
+cutout_radius = 40;
+cutout_angle = 16; // Portion of circle to use for cutouts, in degrees
 
 // Space above the top of the last die; used to align the detent
 ramp_height = 2.85;
@@ -107,33 +109,93 @@ module lips() {
 }
 
 module cutouts() {
-    cube([cutout_width, wall_thick + 2*epsil, cutout_height + ramp_height]);
-    translate([cutout_width + detent_width, 0, 0]) {
+    translate([0,0,-cutout_height-ramp_height]) {
         cube([cutout_width, wall_thick + 2*epsil, cutout_height + ramp_height]);
+        translate([cutout_width + detent_width, 0, 0]) {
+            cube([cutout_width, wall_thick + 2*epsil, cutout_height + ramp_height]);
+        }
     }
 }
 
-// Align and put together all the bits
-difference() {
-    union() {
-        body();
-        cap();
+module round_cutouts() {
+    rotate(-90, [1,0,0]) {
+        linear_extrude(wall_thick + 2*epsil) {
+            translate([-cutout_radius+cutout_width, 0]) {
+                intersection() {
+                    difference() {
+                        circle(cutout_radius, $fn=90);
+                        circle(cutout_radius-cutout_width, $fn=90);
+                    }
+                    polygon([
+                        [0,0],
+                        [999*cos(cutout_angle),999*sin(cutout_angle)],
+                        [999,0]
+                    ]);
+                }
+            }
+            translate([cutout_radius+detent_width+cutout_width, 0]) {
+                intersection() {
+                    difference() {
+                        circle(cutout_radius, $fn=90);
+                        circle(cutout_radius-cutout_width, $fn=90);
+                    }
+                    polygon([
+                        [0,0],
+                        [-999*cos(cutout_angle),999*sin(cutout_angle)],
+                        [-999,0]
+                    ]);
+                }
+            }
+        }
+    }
+}
+
+module holder() {
+    // Align and put together all the bits
+    difference() {
+        union() {
+            body();
+            cap();
+            translate([
+                (wall_thick*2 + die_width + detent_width)/2,
+                wall_thick + die_width,
+                wall_thick + num_dice*die_height + ramp_height - detent_height
+            ]) {
+                detent();
+            }
+            translate([0, 0, wall_thick + num_dice*die_height + ramp_height - lip_height]) {
+                lips();
+            }
+        }
         translate([
-            (wall_thick*2 + die_width + detent_width)/2,
-            wall_thick + die_width,
-            wall_thick + num_dice*die_height + ramp_height - detent_height
+            wall_thick + (die_width - detent_width)/2 - cutout_width,
+            wall_thick + die_width - epsil,
+            wall_thick + die_height*num_dice + ramp_height + epsil
         ]) {
-            detent();
-        }
-        translate([0, 0, wall_thick + num_dice*die_height + ramp_height - lip_height]) {
-            lips();
+          union() {
+            //cutouts();
+            round_cutouts();
+          }
         }
     }
-    translate([
-        wall_thick + (die_width - detent_width)/2 - cutout_width,
-        wall_thick + die_width - epsil,
-        wall_thick*2 + die_height*num_dice - cutout_height
-    ]) {
-        cutouts();
+}
+
+module on_axis_holder() {
+    translate([-1.5*wall_thick - die_width, -1.5*wall_thick - die_width, 0]) {
+        holder();
     }
+}
+
+module triholder() {
+    on_axis_holder();
+    rotate(120, [0,0,1]) {
+        on_axis_holder();
+    }
+    rotate(-120, [0,0,1]) {
+        on_axis_holder();
+    } 
+}
+
+render(convexity=8) {
+    holder();
 }
