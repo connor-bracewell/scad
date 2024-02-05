@@ -6,15 +6,19 @@ easily allow for other amounts of dice, or to use different dice sizes or tolera
 a little more effort.
 */
 
-// Number of dice to generate for
+/*[Dice Propertes]*/
+// Number of dice
 num_dice = 6;
-
-// Dimensions of the dice, with tolerance
+// Width of each die, with tolerance
 die_width = 12.40;
+// Height of each die, with tolerance
 die_height = 11.93;
 
-// Thickness of all body walls
+/*[Model Properties]*/
+// Thickness of body walls
 wall_thick = 1.1;
+
+module end_customizer() {}
 
 // Width of the walls that hold the dice in
 retainer_width = 2.25;
