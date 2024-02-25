@@ -12,20 +12,13 @@ num_dice = 4;
 // Width of each die, with tolerance
 die_width = 12.35;
 // Height of each die, with tolerance
-die_height = 11.81;
-
-//build volume (use %)
-*cube([180,180,180]);
+die_height = 11.93;
 
 /*[Model Properties]*/
 // Thickness of body walls
 wall_thick = 1.3;
 
 module end_customizer() {}
-
-xaxis=[1,0,0];
-yaxis=[0,1,0];
-zaxis=[0,0,1];
 
 // Width of the walls that hold the dice in
 retainer_width = 2.25;
@@ -52,6 +45,7 @@ lip_height = 20;
 // Tolerance value to avoid floating point errors in render
 epsil = 0.001;
 
+
 module body() {
     linear_extrude(wall_thick + num_dice * die_height + ramp_height) {
         difference() {
@@ -65,14 +59,14 @@ module body() {
 }
 
 module cap() {
-  linear_extrude(wall_thick) {
-    translate([wall_thick/2,wall_thick/2]) {
-      difference() {
-        square(die_width+2*wall_thick/2);
-        circle(die_width - retainer_width+wall_thick/2, $fn=90);
-      }
+    linear_extrude(wall_thick) {
+        translate([wall_thick, wall_thick]) {
+            difference() {
+                square(die_width);
+                circle(die_width - retainer_width, $fn=90);
+            }
+        }
     }
-  }
 }
 
 module detent() {
@@ -245,5 +239,9 @@ module triholder() {
 
 render(convexity=8) {
   holder();
-  translate([wall_thick,0,0]) mirror(xaxis) holder();
 }
+
+xaxis=[1,0,0];
+yaxis=[0,1,0];
+zaxis=[0,0,1];
+
